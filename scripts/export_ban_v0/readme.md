@@ -12,7 +12,7 @@ Les fichiers de sortie de l'export BAN au format json
 - arg6: nom du fichier des housenumber default housenumber.ndjson
 
 #### En sortie: ####
-Fichier csv au format ban v0 odbl (sans les champs nom_afnor et libellé acheminement)
+Fichier csv au format ban v0 odbl (sans le champ nom_afnor)
 
 #### remarques sur le traitement effectué: ####
 Pour la géometrie projetée, la projection native est utilisée (Lambert93 pour France métropolitaine...)

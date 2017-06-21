@@ -18,8 +18,8 @@ def export(
                 lineterminator='\n'
     )
     c.writerow(['id', 'nom_voie', 'id_fantoir', 'numero', 'rep', 'code_insee',
-                'code_post', 'alias', 'nom_ld', 'x', 'y', 'lon', 'lat',
-                'nom_commune'])
+                'code_post', 'alias', 'nom_ld', 'libelle_acheminement',
+                'x', 'y', 'lon', 'lat', 'nom_commune'])
     with open(chemin+'/'+doc_municipality, 'r') as document:
         for ligne in document:
             data = json.loads(ligne)
@@ -81,6 +81,7 @@ def writeNewLine(writer, housenumber, group, ancestors, municipality, postcode, 
                     postcode['code'] if postcode is not None else '',
                     group['alias'],
                     groupResult[1],
+                    postcode['name'] if postcode is not None else '',
                     positionXY[0],
                     positionXY[1],
                     lonlat[0],
