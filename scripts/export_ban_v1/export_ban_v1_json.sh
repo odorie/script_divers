@@ -8,7 +8,7 @@
 #############################################################################
 # REMARQUE :
 # - la base PostgreSQL, le port doivent être passés dans les variables d'environnement
-#     PGDATABASE et PGUSER
+#     PGDATABASE et si besoin PGUSER, PGHOST et PGPASSWORD
 #############################################################################
 outPath=$1
 

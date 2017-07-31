@@ -5,12 +5,19 @@ from pyproj import Proj, transform
 
 
 def export(
-    chemin, dep, doc_municipality, doc_postcode, doc_group, doc_housenumber
+    chemin, dep, doc_municipality, doc_postcode, doc_group, doc_housenumber, doc_position
 ):
+    '''
+    Usage : export <chemin json initial> <departement>
+    Exemple : export . 01
+    Remarque : le json ban v0 est genere a l'emplacement des json
+    '''
     municipalities = {}
     postcodes = {}
     groups = {}
     housenumbers = {}
+    housenumbers_id = {}
+    positions = {}
     exportPath = '{}/export_{}.csv'.format(chemin, dep)
     c = csv.writer(
                 open(exportPath, 'w'),
@@ -38,15 +45,20 @@ def export(
             if data['municipality'] in municipalities.keys():
                 groups[data['id']] = data
     print('{} groups'.format(len(groups)))
-    hn_count = 0
     with open(chemin+'/'+doc_housenumber, 'r') as document:
         for ligne in document:
             data = json.loads(ligne)
-            if 'number' in data.keys():
-                if data['parent'] in groups.keys():
-                    housenumbers.setdefault(data['parent'], []).append(data)
-                    hn_count += 1
-    print('{} housenumbers'.format(hn_count))
+            if data['parent'] in groups.keys():
+                housenumbers.setdefault(data['parent'], []).append(data)
+                housenumbers_id[data['id']] = None
+    print('{} housenumbers'.format(len(housenumbers)))
+    with open(chemin+'/'+doc_position, 'r') as document:
+        for ligne in document:
+            data = json.loads(ligne)
+            if data['housenumber'] in housenumbers_id.keys():
+                positions.setdefault(data['housenumber'], []).append(data)
+    print('{} positions'.format(len(positions)))
+
 
     epsg_code = getEPSGCode(dep)
 
@@ -54,7 +66,7 @@ def export(
         group_hns = housenumbers.get(group['id'], [])
         municipality = municipalities.get(group['municipality'], None)
         for housenumber in group_hns:
-            position = findPosition(housenumber)
+            position = findPosition(housenumber, positions)
             ancestors = findAncestors(housenumber, groups)
             postcode = postcodes.get(housenumber['postcode'], None)
 
@@ -62,7 +74,7 @@ def export(
 
 
 def writeNewLine(writer, housenumber, group, ancestors, municipality, postcode, position, epsg_code):
-    """ecrit une nouvelle ligne dans le fichier d export csv"""
+    # ecrit une nouvelle ligne dans le fichier d export csv
     groupResult = compulseGroups(group, ancestors)
     if position is None:
         lonlat = ('', '')
@@ -90,11 +102,9 @@ def writeNewLine(writer, housenumber, group, ancestors, municipality, postcode, 
 
 
 def convertPosition(position, code):
-    """
-        pour une position donnee retourne les coordonnees projetees
-        selon la projection native
-        @return (x,y)
-    """
+    # pour une position donnee retourne les coordonnees projetees
+    # selon la projection native
+    # return (x,y)
     positionXY = ('', '')
     if position is None:
         return positionXY
@@ -109,7 +119,7 @@ def convertPosition(position, code):
 
 
 def getEPSGCode(dep):
-    """renvoie le code epsg correspondant pour un departement donne"""
+    # renvoie le code epsg correspondant pour un departement donne
     codes = {
         '971': '4559',
         '972': '4559',
@@ -123,7 +133,7 @@ def getEPSGCode(dep):
 
 
 def compulseGroups(group, ancestors):
-    """@return (nom_voie, nom_ld)"""
+    # return (nom_voie, nom_ld)
     result = ['', '']
 
     if group["kind"] == 'way':
@@ -142,10 +152,8 @@ def compulseGroups(group, ancestors):
 
 
 def findBestAncestor(ancestors, type):
-    """
-        selectionne l ancestor le plus recent d un type donne
-        parmi un tableau d ancestors
-    """
+    # selectionne l ancestor le plus recent d un type donne
+    # parmi un tableau d ancestors
     best_ancestor = None
     for ancestor in ancestors:
         if ancestor["kind"] == type and best_ancestor is None:
@@ -155,18 +163,16 @@ def findBestAncestor(ancestors, type):
     return best_ancestor
 
 
-def findPosition(housenumber):
-    """
-        selectionne la position la plus recente
-        pour le meilleur kind disponible
-    """
-    positions = housenumber['positions']
+def findPosition(housenumber, positions):
+    # selectionne la position la plus recente
+    # pour le meilleur kind disponible
+    hn_positions = positions.get(housenumber['id'], [])
     kinds = [
             "entrance", "building", "staircase", "unit",
             "parcel", "segment", "utility", "area", "postal", "unknown"]
     ids = {}
     bestPosition = None
-    for position in positions:
+    for position in hn_positions:
         ids.setdefault(position['kind'], []).append(position)
     for kind in kinds:
         if kind in ids.keys():
@@ -179,11 +185,12 @@ def findPosition(housenumber):
 
 
 def findAncestors(housenumber, groups):
-    """renvoie le tableau d ancestors lie a un housenumber donne"""
+    # renvoie le tableau d ancestors lie a un housenumber donne
     results = []
     anc_ids = housenumber["ancestors"]
-    for anc_id in anc_ids:
-        results.append(groups.get(anc_id))
+    if anc_ids:
+        for anc_id in anc_ids:
+            results.append(groups.get(anc_id))
     return results
 
 
@@ -192,5 +199,16 @@ if __name__ == "__main__":
     postcodeFile = sys.argv[4] if len(sys.argv) > 4 else "postcode.ndjson"
     groupFile = sys.argv[5] if len(sys.argv) > 5 else "group.ndjson"
     housenumberFile = sys.argv[6] if len(sys.argv) > 6 else "housenumber.ndjson"
-
-    export(sys.argv[1], sys.argv[2], municipalityFile, postcodeFile, groupFile, housenumberFile)
+    positionFile = sys.argv[7] if len(sys.argv) > 7 else "position.ndjson"
+    comment = '''
+    Usage : export <chemin json initial> <departement>
+    Exemple : export . 01
+    Remarque : le json ban v0 est genere a l'emplacement des json
+    '''
+    try:
+        chemin = sys.argv[1]
+        dep = sys.argv[2]
+    except:
+        print (comment)
+        sys.exit()
+    export(chemin, dep, municipalityFile, postcodeFile, groupFile, housenumberFile, positionFile)
