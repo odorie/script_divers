@@ -5,12 +5,13 @@ from pyproj import Proj, transform
 
 
 def export(
-    chemin, dep, doc_municipality, doc_postcode, doc_group, doc_housenumber
+    chemin, dep, doc_municipality, doc_postcode, doc_group, doc_housenumber, doc_position
 ):
     municipalities = {}
     postcodes = {}
     groups = {}
     housenumbers = {}
+    positions = {}
     exportPath = '{}/export_{}.csv'.format(chemin, dep)
     c = csv.writer(
                 open(exportPath, 'w'),
@@ -47,6 +48,15 @@ def export(
                     housenumbers.setdefault(data['parent'], []).append(data)
                     hn_count += 1
     print('{} housenumbers'.format(hn_count))
+    pos_count = 0
+    with open(chemin+'/'+doc_position, 'r') as document:
+        for ligne in document:
+            data = json.loads(ligne)
+            if 'center' in data.keys():
+                if data['housenumber'] in housenumbers.keys():
+                    positions.setdefault(data['housenumber'], []).append(data)
+                    pos_count += 1
+    print('{} positions'.format(pos_count))
 
     epsg_code = getEPSGCode(dep)
 
@@ -54,7 +64,7 @@ def export(
         group_hns = housenumbers.get(group['id'], [])
         municipality = municipalities.get(group['municipality'], None)
         for housenumber in group_hns:
-            position = findPosition(housenumber)
+            position = findPosition(housenumber, positions)
             ancestors = findAncestors(housenumber, groups)
             postcode = postcodes.get(housenumber['postcode'], None)
 
@@ -155,12 +165,12 @@ def findBestAncestor(ancestors, type):
     return best_ancestor
 
 
-def findPosition(housenumber):
+def findPosition(housenumber, positions):
     """
         selectionne la position la plus recente
         pour le meilleur kind disponible
     """
-    positions = housenumber['positions']
+    positions = positions[housenumber['pk']]
     kinds = [
             "entrance", "building", "staircase", "unit",
             "parcel", "segment", "utility", "area", "postal", "unknown"]
@@ -192,5 +202,6 @@ if __name__ == "__main__":
     postcodeFile = sys.argv[4] if len(sys.argv) > 4 else "postcode.ndjson"
     groupFile = sys.argv[5] if len(sys.argv) > 5 else "group.ndjson"
     housenumberFile = sys.argv[6] if len(sys.argv) > 6 else "housenumber.ndjson"
-
-    export(sys.argv[1], sys.argv[2], municipalityFile, postcodeFile, groupFile, housenumberFile)
+    positionFile = sys.argv[7] if len(sys.argv) > 7 else "position.ndjson"
+    
+    export(sys.argv[1], sys.argv[2], municipalityFile, postcodeFile, groupFile, housenumberFile, positionFile)
