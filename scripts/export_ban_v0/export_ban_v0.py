@@ -2,6 +2,7 @@ import json
 import csv
 import sys
 from pyproj import Proj, transform
+import progressbar
 
 
 def export(
@@ -27,42 +28,57 @@ def export(
     c.writerow(['id', 'nom_voie', 'id_fantoir', 'numero', 'rep', 'code_insee',
                 'code_post', 'alias', 'nom_ld', 'libelle_acheminement',
                 'x', 'y', 'lon', 'lat', 'nom_commune'])
+
     with open(chemin+'/'+doc_municipality, 'r') as document:
         for ligne in document:
             data = json.loads(ligne)
             if data['insee'].startswith(dep):
                 municipalities[data['id']] = data
     print('{} municipalities'.format(len(municipalities)))
+
     with open(chemin+'/'+doc_postcode, 'r') as document:
         for ligne in document:
             data = json.loads(ligne)
             if data['municipality'] in municipalities.keys():
                 postcodes[data['id']] = data
     print('{} postcodes'.format(len(postcodes)))
+
     with open(chemin+'/'+doc_group, 'r') as document:
         for ligne in document:
             data = json.loads(ligne)
             if data['municipality'] in municipalities.keys():
                 groups[data['id']] = data
     print('{} groups'.format(len(groups)))
+
+    housenumberNb = 0
     with open(chemin+'/'+doc_housenumber, 'r') as document:
         for ligne in document:
             data = json.loads(ligne)
             if data['parent'] in groups.keys():
                 housenumbers.setdefault(data['parent'], []).append(data)
                 housenumbers_id[data['id']] = None
-    print('{} housenumbers'.format(len(housenumbers)))
+                housenumberNb += 1
+    print('{} housenumbers'.format(housenumberNb))
+
+    positionNb = 0
     with open(chemin+'/'+doc_position, 'r') as document:
         for ligne in document:
             data = json.loads(ligne)
             if data['housenumber'] in housenumbers_id.keys():
+                positionNb += 1
                 positions.setdefault(data['housenumber'], []).append(data)
-    print('{} positions'.format(len(positions)))
+    print('{} positions'.format(positionNb))
+    print('{} positions regroupees par hn'.format(len(positions)))
 
 
     epsg_code = getEPSGCode(dep)
 
+    count = 0
+    bar = progressbar.ProgressBar(maxval=len(groups))
+    bar.start()
     for group in groups.values():
+        count += 1
+        bar.update(count)
         group_hns = housenumbers.get(group['id'], [])
         municipality = municipalities.get(group['municipality'], None)
         for housenumber in group_hns:
@@ -71,7 +87,7 @@ def export(
             postcode = postcodes.get(housenumber['postcode'], None)
 
             writeNewLine(c, housenumber, group, ancestors, municipality, postcode, position, epsg_code)
-
+    bar.finish()
 
 def writeNewLine(writer, housenumber, group, ancestors, municipality, postcode, position, epsg_code):
     # ecrit une nouvelle ligne dans le fichier d export csv
