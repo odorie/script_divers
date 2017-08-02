@@ -1,4 +1,4 @@
-# Programme d'export de la ban#
+# Programme d'export de la ban
 
 ## Dump PostgreSQL ##
 Le shell dump_ban_prod.sh permet de faire un dump PostgreSQL classique de la ban entière.
@@ -15,7 +15,8 @@ Le script export_csv.py permet de générer les exports en csv de la ban.
 
 ### Fonctionnement du script
 Ce script fonctionne à partir de l'export en json.
-Il nécessite Python 3.x + le package pyproj
+Il nécessite Python 3.x + le package pyproj.
+
 Il prend en entrée les arguments suivants :
 
 - arg1: chemin repertoire pour export et fichiers a traiter
@@ -28,15 +29,16 @@ Il prend en entrée les arguments suivants :
 Exemple :  python export_ban_v0.py ~/data/ban_prod/export_json 33
 
 En sortie, le fichier csv est généré à l'emplacement des fichiers json. 
-Le fichier généré au format ban v0 odbl (sans le champ nom_afnor)
 
-#### Remarques sur le traitement effectué ####
+Le fichier généré au format ban v0 odbl (sans le champ nom_afnor).
+
+### Remarques sur le traitement effectué ###
 Pour la géometrie projetée, la projection native est utilisée (Lambert93 pour France métropolitaine...)
 
 En cas de positions multiples sur un housenumber, le script exporte une seule position en utilisant l'ordre de priorité suivant sur le champ kind:
 "entrance", "building", "staircase", "unit", "parcel", "segment", "utility", "area", "postal", "unknown"
 Si plusieurs positions ont le même kind retenu, le programme retient la position la plus récente (champ modified_at)
 
-Pour le remplissage de nom_voie/lieu dit, le programme se base sur le type du groupe
-on complète les noms avec les ancestors. Si deux ancestors de même type on prend le plus récent
+Pour le remplissage de nom_voie/lieu dit, le programme se base sur le type du groupe.
+On complète les noms avec les ancestors. Si deux ancestors de même type on prend le plus récent
 S'il reste vide, on remplit le nom de voie avec le nom du lieu dit
