@@ -1,3 +1,6 @@
+#### export_ban_v0.py ####
+Le script export_ban_v0.py permet de générer les exports en csv ban v0 à partir de l'export json de la banv1.
+
 Nécessite Python 3.x + le package pyproj
 
 #### En entrée: ####
@@ -6,10 +9,12 @@ Les fichiers de sortie de l'export BAN au format json
 #### En arguments: ####
 - arg1: chemin repertoire pour export et fichiers a traiter
 - arg2: departement a traiter
-- arg3: nom du fichier des municipality default municipality.ndjson
-- arg4: nom du fichier des postcode default postcode.ndjson
-- arg5: nom du fichier des group default group.ndjson
-- arg6: nom du fichier des housenumber default housenumber.ndjson
+- arg3: nom du fichier des municipality. Argument facultatif. Par défaut le fichier doit être municipality.ndjson. 
+- arg4: nom du fichier des postcode. Argument facultatif. Par défaut le fichier doit être postcode.ndjson.
+- arg5: nom du fichier des group. Argument facultatif. Par défaut le fichier doit être group.ndjson.
+- arg6: nom du fichier des housenumber. Argument facultatif. Par défaut le fichier doit être housenumber.ndjson.
+
+Exemple :  python export_ban_v0.py ~/data/ban_prod/export_json 33
 
 #### En sortie: ####
 Fichier csv au format ban v0 odbl (sans le champ nom_afnor)
