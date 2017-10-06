@@ -11,10 +11,10 @@
 #     PGDATABASE et si besoin PGUSER, PGHOST et PGPASSWORD
 #############################################################################
 outPath=$1
-
-if [ $# -ne 1 ]; then
-        echo "Usage : export_ban_json.sh <outPath> "
-        echo "Exemple : export_ban_json.sh /home/ban/test"
+dep=$2
+if [ $# -lt 1 ]; then
+        echo "Usage : export_ban_json.sh <outPath> <dep>"
+        echo "Exemple : export_ban_json.sh /home/ban/test 90"
         exit 1
 fi
 
@@ -48,11 +48,11 @@ requete_municipality="
 			(SELECT row_to_json(c) FROM (${requete_create_by_client_user}) AS c) AS created_by,
 			modified_at,
 			(SELECT row_to_json(m) FROM (${requete_modified_by_client_user}) AS m) AS modified_by 
-		FROM municipality where deleted_at is null) AS t"
+		FROM municipality where deleted_at is null and insee like '${dep}%') AS t"
 
 requete_municipality=`echo ${requete_municipality}| sed "s/\n//"`
 
-echo "\COPY (${requete_municipality})  TO '${outPath}/municipality.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_municipality})  TO '${outPath}/${dep}_municipality.ndjson'" >> commandeTemp.sql
 
 # PostCode
 requete_postcode="
@@ -71,13 +71,13 @@ requete_postcode="
                         modified_at,
                         (SELECT row_to_json(m) FROM (${requete_modified_by_client_user}) AS m) AS modified_by
                 FROM postcode 
-		LEFT JOIN (select pk,id from municipality) as mu ON (mu.pk = municipality_id )
-		where deleted_at is null
+		LEFT JOIN (select pk,id from municipality where insee like '${dep}%') as mu ON (mu.pk = municipality_id )
+		where deleted_at is null and mu.id is not null
 		) AS t"
 
 requete_postcode=`echo ${requete_postcode}| sed "s/\n//"`
 
-echo "\COPY (${requete_postcode})  TO '${outPath}/postcode.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_postcode})  TO '${outPath}/${dep}_postcode.ndjson'" >> commandeTemp.sql
 
 # Groupe
 requete_group="
@@ -99,13 +99,13 @@ requete_group="
                         modified_at,
                         (SELECT row_to_json(m) FROM (${requete_modified_by_client_user}) AS m) AS modified_by
                 FROM \"group\"
-		LEFT JOIN (select pk,id from municipality) as mu ON (mu.pk = municipality_id )
-		where deleted_at is null
+		LEFT JOIN (select pk,id from municipality where insee like '${dep}%') as mu ON (mu.pk = municipality_id )
+		where deleted_at is null and mu.id is not null
 		) AS t"
 
 requete_group=`echo ${requete_group}| sed "s/\n//"`
 
-echo "\COPY (${requete_group})  TO '${outPath}/group.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_group})  TO '${outPath}/${dep}_group.ndjson'" >> commandeTemp.sql
 
 # housenumber
 requete_hn="
@@ -127,18 +127,19 @@ requete_hn="
                         modified_at,
                         (SELECT row_to_json(m) FROM (${requete_modified_by_client_user}) AS m) AS modified_by
                 FROM housenumber as hn
-                LEFT JOIN (select pk,id from postcode) as pc ON (pc.pk = postcode_id )
-                LEFT JOIN (select pk,id from \"group\") as g ON (g.pk = parent_id )
+                LEFT JOIN (select p.pk,p.id from postcode p, municipality m where p.municipality_id=m.pk and m.insee like '${dep}%') as pc ON (pc.pk = postcode_id )
+                LEFT JOIN (select g.pk,g.id from \"group\" g, municipality m where g.municipality_id=m.pk and m.insee like '${dep}%') as g ON (g.pk = parent_id )
 		LEFT JOIN 
-			(SELECT housenumber_id,array_agg(\"group\".id)
-                        FROM housenumber_group_through LEFT JOIN \"group\" ON (group_id = \"group\".pk) GROUP BY housenumber_id)
+			(SELECT housenumber_id,array_agg(hn_t_g.id)
+                        FROM housenumber_group_through LEFT JOIN (select g.* from \"group\" g, municipality m where g.municipality_id=m.pk and m.insee like '${dep}%') as hn_t_g
+			ON (group_id = hn_t_g.pk) GROUP BY housenumber_id)
                         AS g2 ON (g2.housenumber_id = hn.pk)
-		where deleted_at is null
+		where deleted_at is null and g.id is not null
                 ) AS t"
 
 requete_hn=`echo ${requete_hn}| sed "s/\n//"`
 
-echo "\COPY (${requete_hn})  TO '${outPath}/housenumber.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_hn})  TO '${outPath}/${dep}_housenumber.ndjson'" >> commandeTemp.sql
 
 # position
 requete_position="
@@ -162,14 +163,14 @@ requete_position="
                         modified_at,
                         (SELECT row_to_json(m) FROM (${requete_modified_by_client_user}) AS m) AS modified_by
                 FROM position 
-                LEFT JOIN (select pk,id from housenumber) as hn ON (hn.pk = housenumber_id )
+                LEFT JOIN (select hn.pk,hn.id from housenumber hn, \"group\" g, municipality m where hn.parent_id=g.pk and g.municipality_id=m.pk and m.insee like '${dep}%') as hn ON (hn.pk = housenumber_id )
                 LEFT JOIN (select pk,id from position) as pos2 ON (pos2.pk = parent_id )
-		where deleted_at is null
+		where deleted_at is null and hn.id is not null
                 ) AS t"
 
 requete_position=`echo ${requete_position}| sed "s/\n//"`
 
-echo "\COPY (${requete_position})  TO '${outPath}/position.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_position})  TO '${outPath}/${dep}_position.ndjson'" >> commandeTemp.sql
 
 
 psql -f commandeTemp.sql
