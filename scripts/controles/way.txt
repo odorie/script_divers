@@ -1,0 +1,522 @@
+ALLEES
+allées
+ALL
+ANCIENNES MONTEES
+anciennes montées
+AMT
+ANCIENNES ROUTES
+anciennes routes
+ART
+ANCIENS CHEMINS
+anciens chemins
+ACH
+ARCADES
+arcades
+ARC
+BERGES
+berges
+BER
+ALLEE
+allée
+ANCIEN CHEMIN
+ancien chemin
+ANCIENNE MONTEE
+ancienne montée
+ANCIENNE ROUTE
+ancienne route
+ARCADE
+arcade
+AUTOROUTE
+autoroute
+AUT
+AVENUE
+avenue
+AV
+BALI
+CENTRE
+centre
+bali
+BAN
+ban
+BAS CHEMIN
+bas chemin
+BCH
+BERGE
+berge
+BIDEA
+bidea
+BIDEBURUA
+bideburua
+BIDECHKA
+bidechka
+BIDEKURUTZE
+bidekurutze
+BIDEXKA
+bidexka
+BOUCLE
+boucle
+BCLE
+BOULEVARD
+boulevard
+BD
+BRECHE
+brèche
+CALE
+cale
+CAMI
+cami
+CAMIN
+camin
+CAMINAU
+caminau
+CHEMINS
+chemins
+CHE
+ESCALES
+escales
+ESCAILLERE
+escaillere
+ESCALADOU
+escaladou
+ESCALANETTE
+escalanette
+ESCALAOUS
+escalaous
+ESCALARET
+escalaret
+ESCALE
+escale
+ESCALERE
+escalere
+ESCALETTE
+escalette
+ESCALIROTS
+escalirots
+ESCALLE
+escalle
+CAP
+cap
+CARRE
+carré
+CARR
+CARREAU
+carreau
+CAU
+CARRELOT
+carrelot
+CARRERA
+carrera
+CARRERE
+carrere
+CARRERES
+carreres
+CARRERO
+carrero
+CARREROT
+carrerot
+CARRIERA
+carriera
+CARRIEROU
+carrierou
+CARRONT
+carront
+CAUSSADE
+caussade
+CAVEE
+cavée
+CAV
+CHARMILLE
+charmille
+CHI
+CHAUSSEE
+chaussée
+CHS
+CHEMIN
+chemin
+CHEMIN VICINAL
+chemin vicinal
+CHV
+CHEMINEMENT
+cheminement
+CHEM
+ESCALO
+escalo
+ESCALOS
+escalos
+ESCALUSSE
+escalusse
+FAUBOURG
+faubourg
+FG
+FORUM
+forum
+FORM
+FOSSE
+fossé
+FOS
+FOURC
+fourc
+FOURCADE
+fourcade
+GARENN
+garenn
+GARRON
+garron
+GARRONT
+garront
+GOUA
+goua
+GRAND BOULEVARD
+grand boulevard
+GBD
+PERISTYLE
+péristyle
+PSTY
+PASSAGE
+passage
+PAS
+PASSE
+passe
+PASS
+PECH
+pech
+PERIPHERIQUE
+périphérique
+PERI
+PETIT CHEMIN
+petit chemin
+PCH
+RACCOURCI
+raccourci
+RAC
+RAIDILLON
+raidillon
+RAID
+RAISE
+raise
+RAIZE
+raize
+RAMPE
+rampe
+RPE
+REMPART
+rempart
+REM
+ROC
+roc
+ROCADE
+rocade
+ROUTE
+route
+RTE
+RPR
+rpr
+RU
+ru
+RUE
+rue
+R
+RUELLE
+ruelle
+RLE
+RUETTE
+ruette
+RTTE
+SARRAT
+sarrat
+SENTIER
+sentier
+SEN
+SERRE
+serre
+SOUMET
+soumet
+TRAVERSE
+traverse
+TRA
+TUC
+tuc
+TUCAOU
+tucaou
+TUCAU
+tucau
+TUCAUT
+tucaut
+TUCO
+tuco
+TUQUE
+tuque
+VC
+vc
+VENELLE
+venelle
+VEN
+VIA
+via
+CLAU
+clau
+CLOS
+clos
+CLOT
+clot
+CLOTS
+clots
+LOTISSEMENT
+lotissement
+LOT
+COSTE
+coste
+COSTES
+costes
+COSTO
+costo
+COSTOS
+costos
+COT
+cot
+COTEAU
+coteau
+COTE
+COUR
+cour
+COUREE
+courée
+COURS
+cours
+CRS
+DEGRE
+degré
+DEG
+DESCENTE
+descente
+DSC
+DIGUE
+digue
+DIG
+DREVE
+drève
+ESCALIER
+escalier
+ESC
+GRAND ENSEMBLE
+grand ensemble
+GDEN
+GRAND RUE
+grand rue
+GR
+GRIMPETTE
+grimpette
+GRIM
+SENTE
+sente
+SENTES
+sentes
+STR
+str
+cote
+GRANDES RUES
+grandes rues
+GWENOJENN
+gwenojenn
+HAUT CHEMIN
+haut chemin
+HCH
+HENCHOU
+henchou
+HENT
+hent
+HENT DALL
+hent dall
+HENT MEUR
+hent meur
+HENT RIBOUL
+hent riboul
+HENT STLEJAN
+hent stlejan
+HENT TIZH
+hent tizh
+HENT TREUZ
+hent treuz
+HENTOU
+hentou
+HOURC
+hourc
+HOURCADE
+hourcade
+IMPASSE
+impasse
+IMP
+JETEE
+jetée
+JTE
+KARR HENT
+karr hent
+KARR PONT
+karr pont
+KARRIKA
+karrika
+KARRIKABURU
+karrikaburu
+KARRONT
+karront
+KROASHENT TRO
+kroashent tro
+KROAZ HENT TRO
+kroaz hent tro
+KROAZ PONT
+kroaz pont
+LEVEE
+levée
+LEVE
+LICES
+lices
+LODENN
+lodenn
+MONTEE
+montée
+MTE
+MOUNT
+mount
+NOUVELLE ROUTE
+nouvelle route
+NTE
+PETIT DEGRE
+petit degré
+PDEG
+PETITE ALLEE
+petite allée
+PTA
+PETITE AVENUE
+petite avenue
+PAE
+PETITE IMPASSE
+petite impasse
+PIM
+PETITE ROUTE
+petite route
+PRT
+PETITE RUE
+petite rue
+PTR
+PEY
+pey
+POND
+pond
+PORCHE
+porche
+POUECH
+pouech
+POURMENADENN
+pourmenadenn
+POURTOUR
+pourtour
+POUR
+POUSTERLE
+pousterle
+PROMENADE
+promenade
+PROM
+PUJO
+pujo
+PUJOL
+pujol
+PUJOS
+pujos
+QUAI
+quai
+QU
+QUERREUX
+querreux
+STRAED
+straed
+STRAET
+straet
+STRAETE
+straete
+STREAD
+stread
+STREAT
+streat
+STRET
+stret
+PONT
+pont
+VIEILLE ROUTE
+vieille route
+VTE
+VIEUX CHEMIN
+vieux chemin
+VCHE
+VOIE
+voie
+VOI
+VOIE COMMUNALE
+voie communale
+CENTRAL
+central
+CTRE
+CHAUSSEES
+chaussées
+CHEMINEMENTS
+cheminements
+FOSSES
+fossés
+PASSES
+passes
+ROUTES
+routes
+RUELLES
+ruelles
+RUES
+rues
+RUETTES
+ruettes
+SENTIERS
+sentiers
+VENELLES
+venelles
+CHEMINS VICINAUX
+chemins vicinaux
+CLAUX
+claux
+COTEAUX
+coteaux
+DEGRES
+degrés
+DESCENTES
+descentes
+DIGUES
+digues
+ESCALIERS
+escaliers
+ESPACE
+espace
+ESPA
+ESPLANADES
+esplanades
+ESP
+PARVIS
+parvis
+PRV
+GRANDE RUE
+grande rue
+GRANDS ENSEMBLES
+grands ensembles
+HAUTS CHEMINS
+hauts chemins
+IMPASSES
+impasses
+JETEES
+jetées
+MONTEES
+montées
+PETITES ALLEES
+petites allées
+PETITS DEGRES
+petits degrés
+PONTS
+ponts
+VOIES
+voies
+GDE RUE
+gde rue
