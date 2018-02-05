@@ -10,8 +10,13 @@ Le shell export_json.sh permet d'exporter la base PostgreSQL de la ban en json.
 
 L'entête du shell contient la description de celui-ci et son mode d'emploi
 
-## Export en csv ##
-Le script export_csv.py permet de générer les exports en csv de la ban.
+## Export en csv sur un departement ou une commune ##
+Le shell export_csv.sh permet d'exporter la base PostgresSQL de la ban en csv au format v0 sur un département ou une commune.
+
+L'entête du shell contient la description de celui-ci et son mode d'emploi
+
+## Export en csv depuis les fichiers json ##
+Le script export_json_to_csv.py permet de générer les exports en csv de la ban au format v0.
 
 ### Fonctionnement du script
 Ce script fonctionne à partir de l'export en json.
@@ -32,7 +37,9 @@ En sortie, le fichier csv est généré à l'emplacement des fichiers json.
 
 Le fichier généré au format ban v0 odbl (sans le champ nom_afnor).
 
-### Remarques sur le traitement effectué ###
+### Remarques sur le traitement effectué pour l export format v0###
+Le fichier généré au format ban v0 odbl (sans le champ nom_afnor).
+
 Pour la géometrie projetée, la projection native est utilisée (Lambert93 pour France métropolitaine...)
 
 En cas de positions multiples sur un housenumber, le script exporte une seule position en utilisant l'ordre de priorité suivant sur le champ kind:

@@ -18,7 +18,8 @@ if [ $# -lt 1 ]; then
         exit 1
 fi
 
-echo "\set ON_ERROR_STOP 1" > commandeTemp.sql
+
+echo "\set ON_ERROR_STOP 1" > ${outPath}/commandeTemp.sql
 
 requete_create_by_client_user="SELECT session.pk as id,attributes,username as user,client.name as client
                                 FROM session
@@ -52,7 +53,7 @@ requete_municipality="
 
 requete_municipality=`echo ${requete_municipality}| sed "s/\n//"`
 
-echo "\COPY (${requete_municipality})  TO '${outPath}/${dep}_municipality.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_municipality})  TO '${outPath}/${dep}_municipality.ndjson'" >> ${outPath}/commandeTemp.sql
 
 # PostCode
 requete_postcode="
@@ -77,7 +78,7 @@ requete_postcode="
 
 requete_postcode=`echo ${requete_postcode}| sed "s/\n//"`
 
-echo "\COPY (${requete_postcode})  TO '${outPath}/${dep}_postcode.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_postcode})  TO '${outPath}/${dep}_postcode.ndjson'" >> ${outPath}/commandeTemp.sql
 
 # Groupe
 requete_group="
@@ -105,7 +106,7 @@ requete_group="
 
 requete_group=`echo ${requete_group}| sed "s/\n//"`
 
-echo "\COPY (${requete_group})  TO '${outPath}/${dep}_group.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_group})  TO '${outPath}/${dep}_group.ndjson'" >> ${outPath}/commandeTemp.sql
 
 # housenumber
 requete_hn="
@@ -139,7 +140,7 @@ requete_hn="
 
 requete_hn=`echo ${requete_hn}| sed "s/\n//"`
 
-echo "\COPY (${requete_hn})  TO '${outPath}/${dep}_housenumber.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_hn})  TO '${outPath}/${dep}_housenumber.ndjson'" >> ${outPath}/commandeTemp.sql
 
 # position
 requete_position="
@@ -170,10 +171,10 @@ requete_position="
 
 requete_position=`echo ${requete_position}| sed "s/\n//"`
 
-echo "\COPY (${requete_position})  TO '${outPath}/${dep}_position.ndjson'" >> commandeTemp.sql
+echo "\COPY (${requete_position})  TO '${outPath}/${dep}_position.ndjson'" >> ${outPath}/commandeTemp.sql
 
 
-psql -f commandeTemp.sql
+psql -f ${outPath}/commandeTemp.sql
 
 if [ $? -ne 0 ]
 then
@@ -181,7 +182,7 @@ then
    exit 1
 fi
 
-#rm commandeTemp.sql
+rm ${outPath}/commandeTemp.sql
 
 echo "FIN"
 
