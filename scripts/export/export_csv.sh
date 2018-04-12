@@ -14,8 +14,8 @@
 outPath=$1
 municipality=$2
 if [ $# -lt 1 ]; then
-        echo "Usage : export_csv_mun.sh <outPath> <municipality>"
-        echo "Exemple : export_csv_mun.sh /home/ban/test 90001"
+        echo "Usage : export_csv.sh <outPath> <municipality>"
+        echo "Exemple : export_csv.sh /home/ban/test 90001"
         exit 1
 fi
 
@@ -33,10 +33,10 @@ select hn.id as id,
 		end
 	) as nom_voie, 
 	g.fantoir as id_fantoir, 
-	hn.number as number, 
+	hn.number as numero, 
 	hn.ordinal as rep, 
 	m.insee as code_insee, 
-	pt.code as code_post, 
+	pt.code as code_postal, 
 	g.alias as alias, 
 	(
 		case
