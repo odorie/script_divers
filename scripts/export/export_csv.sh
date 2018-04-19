@@ -19,6 +19,8 @@ if [ $# -lt 1 ]; then
         exit 1
 fi
 
+#set -x
+echo "Traitement de l'insee $municipality"
 
 echo "\set ON_ERROR_STOP 1" > ${outPath}/commandeTemp.sql
 
@@ -33,6 +35,7 @@ select hn.id as id,
 		end
 	) as nom_voie, 
 	g.fantoir as id_fantoir, 
+	g.id as id_voie,
 	hn.number as numero, 
 	hn.ordinal as rep, 
 	m.insee as code_insee, 
@@ -114,9 +117,12 @@ left join
 left join postcode as pt on hn.postcode_id = pt.pk  
 left join municipality as m on pt.municipality_id = m.pk
 where m.insee like '${municipality}%'
-and hn.deleted_at is null"
+and hn.deleted_at is null
+and hn.number is not null"
 
-echo "COPY (${requete}) TO '${outPath}/${municipality}_ban_v0.csv' CSV HEADER" >> ${outPath}/commandeTemp.sql
+requete=`echo ${requete}| sed "s/\n//"`
+
+echo "\COPY (${requete}) TO '${outPath}/${municipality}_ban_v0.csv' CSV HEADER" >> ${outPath}/commandeTemp.sql
 
 psql -f ${outPath}/commandeTemp.sql
 
