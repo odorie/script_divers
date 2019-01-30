@@ -19,7 +19,7 @@ def init():
         cur.execute("DROP TABLE IF EXISTS controles.item;")
         cur.execute("DROP TABLE IF EXISTS controles.metadata;")
         cur.execute("CREATE TABLE controles.metadata (id serial PRIMARY KEY, date timestamp without time zone, kind character varying, level character varying, item_nb integer, extent character varying);")
-        cur.execute("CREATE TABLE controles.item(id serial PRIMARY KEY, id_meta integer REFERENCES controles.metadata (id),comment text);")
+        cur.execute("CREATE TABLE controles.item(id serial PRIMARY KEY, id_meta integer REFERENCES controles.metadata (id), comment character varying);")
         cur.execute("CREATE TABLE controles.resource(id serial PRIMARY KEY, id_res integer, version integer, name character varying, id_item integer REFERENCES controles.item (id));")
         cur.execute("CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;")
         cur.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")

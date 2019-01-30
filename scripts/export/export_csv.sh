@@ -82,8 +82,9 @@ left join
 	left join housenumber as h on p.housenumber_id=h.pk
 	left join postcode as pt on h.postcode_id=pt.pk
 	left join municipality as mun on pt.municipality_id = mun.pk
-	where mun.insee like '${municipality}%' 
-	order by p.housenumber_id, array_position(ARRAY['entrance', 'building', 'staircase', 'unit', 'parcel', 'segment', 'utility', 'area', 'postal', 'unknow'], p.kind::text) ASC, p.modified_at DESC
+	where mun.insee like '${municipality}%'
+	and p.deleted_at is null 
+	order by p.housenumber_id, p.modified_at DESC
 ) as pos on pos.housenumber_id=hn.pk
 left join \"group\" as g on hn.parent_id = g.pk 
 left join
