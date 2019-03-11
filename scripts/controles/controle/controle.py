@@ -5,8 +5,7 @@ import sql
 import datetime
 import networkx as nx
 
-import os
-import csv
+import util
 
 #on prefixe systematiquement avec le type de ressource
 controle_kind = {
@@ -84,7 +83,7 @@ def insert_double_item(kind, resources):
     conn.commit()
 
 
-def insert_item_from_pair(kind, resources):
+def insert_item_from_pair(kind, resources, dep):
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if kind not in controle_kind:
         raise Exception("kind unknown")
@@ -109,8 +108,12 @@ def insert_item_from_pair(kind, resources):
     nb_ccx = 0
     conn = sql.util.db_connect()
     cur = conn.cursor()
+    if dep is not None:
+        dep = "DEP{}".format(dep)
+    else:
+        dep = "FR"
     cur.execute("INSERT INTO controles.metadata VALUES (DEFAULT, %s, %s, %s, %s, %s) RETURNING id;",
-                (timestamp, kind, level, nb_ccx, 'FR'))
+                (timestamp, kind, level, nb_ccx, dep))
     meta_id = cur.fetchone()[0]
     comment = ''
 
@@ -123,6 +126,8 @@ def insert_item_from_pair(kind, resources):
             list = ccii.split('_')
             cur.execute("INSERT INTO controles.resource VALUES (DEFAULT, %s, %s, %s, %s, %s)",
                         (list[0], list[1], resource_type, item_id, list[2]))
+
+    print("Nombre d'incos: {} \n".format(nb_ccx))
 
     cur.execute("UPDATE controles.metadata SET item_nb = {} WHERE id = {}".format(nb_ccx,meta_id))
     cur.execute("UPDATE controles.item c SET insee = r.insee FROM controles.resource as r WHERE c.insee is null and r.id_item = c.id")
@@ -315,35 +320,36 @@ def check_housenumber_outside_municipality():
     insert_simple_item("housenumber_outside_municipality", resources)
 
 
-def check_pile():
+def check_pile(dep):
     conn = sql.util.db_connect()
     cur = conn.cursor()
     print("Création table position projetee ({}) \n".format(str(datetime.datetime.now())))
-    cur.execute("drop table if exists position90")
+    proj = util.get_srid_proj(dep)
+    cur.execute("drop table if exists position_temp")
     cur.execute(
-        "create table position90 as select p.*, st_transform(p.center,2154) as c2154, m.insee "
+        "create table position_temp as select p.*, st_transform(st_setsrid(p.center,4326),{}) as proj, m.insee "
         "from position p, housenumber h, \"group\" g, municipality m "
         "where p.housenumber_id=h.pk "
         "and h.parent_id=g.pk "
         "and g.municipality_id=m.pk "
-        "and m.insee like '90%'"
+        "and m.insee like '{}%'".format(proj, dep)
     )
-    cur.execute("CREATE INDEX position90_c2154 ON position90 USING gist (c2154)")
+    cur.execute("CREATE INDEX idx_position_temp_proj ON position_temp USING gist (proj)")
     print("Regroupement par paire ({}) \n".format(str(datetime.datetime.now())))
     conn.commit()
 
     cur.execute(
         "SELECT p1.id || '_' || p1.version || '_' || p1.insee as cle1 , "
         "p2.id || '_' || p2.version || '_' || p2.insee as cle2 "
-        "FROM position90 p1, position90 p2, "
+        "FROM position_temp p1, position_temp p2, "
         "housenumber h1, housenumber h2 "
         "WHERE p1.housenumber_id=h1.pk AND p2.housenumber_id=h2.pk AND "
         "NOT h1.pk=h2.pk AND "
         "p1.source_kind=p2.source_kind AND " 
-        "p1.c2154 && st_buffer(p2.c2154,5) AND st_distance(p1.c2154, p2.c2154)<5"
+        "p1.proj && st_buffer(p2.proj,5) AND st_distance(p1.proj, p2.proj)<5"
     )
     resources = cur.fetchall()
-    insert_item_from_pair("position_pile", resources)
+    insert_item_from_pair("position_pile", resources, dep)
 
 
 
