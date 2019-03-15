@@ -17,6 +17,7 @@ try:
     cur.execute("create table controles.ban_anomaly (id_anomaly varchar,kind varchar,id_res varchar,version integer)");
     cur.execute("CREATE EXTENSION IF NOT EXISTS fuzzystrmatch")
     cur.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+    cur.execute("CREATE INDEX idx_controles_item_id_meta ON controles.item(id_meta)")
     conn.commit()
 
 except Exception as e:

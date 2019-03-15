@@ -4,15 +4,39 @@ sys.path.append(os.path.dirname(sys.path[0]))
 import progressbar
 import datetime
 import psycopg2.extras
+import argparse
 import ban
 import sql
-
-dep = "90"
-kind = "position_pile"
-
+import util
 
 print("========================================\n")
 print("Debut de la synchronisation avec la ban ({}) \n".format(str(datetime.datetime.now())))
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--kind", help="Kind à traiter (un seul kind)",type=str)
+parser.add_argument("--dept", help="Numéro du département à traiter (un seul département)",type=str)
+args = parser.parse_args()
+
+# vérification du paramètre kind
+kind = args.kind
+if kind is None:
+    raise Exception("L'argument kind est nul")
+split_kind = kind.split(",")
+if len(split_kind) != 1:
+    raise Exception("L'argument kind {} est multiple".format(kind))
+util.check_kinds(split_kind)
+
+
+# vérification du paramètre dept
+dept = args.dept
+if dept is None:
+    raise Exception("L'argument dept est nul")
+if dept != "fr":
+    split_dept = dept.split(",")
+    if len(split_dept) != 1:
+        raise Exception("L'argument dept {} est multiple".format(dept))
+    util.check_depts(split_dept)
+
 
 conn = sql.util.db_connect()
 cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -21,14 +45,14 @@ cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 # Et chargement dans la table controles.ban_anomaly de la base de travail
 cur.execute("TRUNCATE controles.ban_anomaly")
 
-print("Recuperation des anomalies ban de kind {} sur le dép {} \n".format(kind, dep))
-total_ano = ban.request.get_anomaly_count(dep,kind)
+print("Recuperation des anomalies ban de kind {} sur le dép {} \n".format(kind, dept))
+total_ano = ban.request.get_anomaly_count(dept, kind)
 
 bar = progressbar.ProgressBar(max_value=total_ano).start()
 count = 0
 
 for i in range(0, total_ano, 100):
-    collection_ano = ban.request.get_anomaly_by_bloc(dep,kind,100,i)
+    collection_ano = ban.request.get_anomaly_by_bloc(dept,kind,100,i)
     # on liste chaque anomalie
     for ano_ban in collection_ano:
         count = count + 1
@@ -45,20 +69,45 @@ bar.finish()
 # on fait 2 tables anomalies new et anomalies old
 # on calcule une clé commune sur (concaténation des id ban + version)
 print("\nComparaison des anomalies ban \n")
+
+# pour les new, on recherche le dernier lancement de ce contrôle (id_meta)
+if dept != "fr":
+    cur.execute(
+        "select id from controles.metadata where extent = 'DEP{}' and kind = '{}' order by id DESC limit 1;"
+        .format(dept, kind)
+    )
+else:
+    cur.execute(
+        "select id from controles.metadata where extent = 'FR' and kind = '{}' order by id DESC limit 1;"
+        .format(kind)
+    )
+
+res = cur.fetchone()
+# puis on ne récupère que les items correspondants à ce dernier lancement
+if res is not None:
+    id_meta = res["id"]
+else:
+    id_meta = -1
 cur.execute("drop table if exists controles.new")
-cur.execute("drop table if exists controles.old")
 cur.execute(
-    "create table controles.new as select id_item,"
-    "md5(string_agg(id_res || '-' || version, '|' order by id_res)) as md5, "
-    "string_agg(id_res || '_' || version, '|' order by id_res) as id_resources "
-    "from controles.resource group by id_item"
+    "create table controles.new as select r.id_item,"
+    "md5(string_agg(r.id_res || '-' || r.version, '|' order by r.id_res)) as md5, "
+    "string_agg(r.id_res || '_' || r.version, '|' order by r.id_res) as id_resources "
+    "from controles.resource as r "
+    "left join controles.item as i on i.id = r.id_item where i.id_meta = {} group by r.id_item"
+    .format(id_meta)
 )
+
+# pour les olds, on les récupère celles qui viennent de l'api ban
+cur.execute("drop table if exists controles.old")
 cur.execute(
     "create table controles.old as  select id_anomaly,"
     "md5(string_agg(id_res || '-' || version, '|' order by id_res)) as md5, "
     "string_agg(id_res || '_' || version, '|' order by id_res) as id_resources "
-    "from controles.ban_anomaly group by id_anomaly"
+    "from controles.ban_anomaly group by id_anomaly "
 )
+
+# comparaison old/new basée sur la clé de comparaison
 cur.execute("create index idx_md5_controles_new on controles.new(md5)")
 cur.execute("create index idx_md5_controles_old on controles.old(md5)")
 conn.commit()

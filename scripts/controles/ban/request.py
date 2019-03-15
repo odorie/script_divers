@@ -6,7 +6,7 @@ import ban
 def get_anomaly_count(dep, kind):
     """
         Recuperation du nombre d'anomalies BAN par kind et dep
-        :param dep:
+        :param dep: fr => france entière
         :rtype: string
         :param kind:
         :rtype: string
@@ -16,10 +16,11 @@ def get_anomaly_count(dep, kind):
     url = session.config['BASE_URL'] + '/anomaly'
     headers = session.get_headers()
     payload = {
-        'dep': dep,
         'kind': kind,
         'count': '1'
     }
+    if dep != "fr":
+        payload["dep"] = dep
     request = requests.get(url, proxies=session.get_proxies(), headers=headers, params=payload)
     if request.status_code == 404 or request.status_code == 410:
         print("Pas d'anomalies de ce type sur le departement")
@@ -32,7 +33,7 @@ def get_anomaly_count(dep, kind):
 def get_anomaly_by_bloc(dep,kind,limit,offset):
     """
         Recuperation par bloc des anomalies BAN pour un kind et un dep donné
-        :param dep:
+        :param dep: fr => france entière
         :rtype: string
         :param kind:
         :rtype: string
@@ -47,11 +48,12 @@ def get_anomaly_by_bloc(dep,kind,limit,offset):
     url = session.config['BASE_URL'] + '/anomaly'
     headers = session.get_headers()
     payload = {
-        'dep': dep,
         'kind': kind,
         'limit': limit,
         'offset': offset
     }
+    if dep != "fr":
+        payload["dep"] = dep
     request = requests.get(url, proxies=session.get_proxies(), headers=headers, params=payload)
     if request.status_code == 404 or request.status_code == 410:
         print("Pas d'anomalies de ce type sur le departement")
