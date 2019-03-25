@@ -59,9 +59,9 @@ for kind in split_kinds:
         for dep in split_depts:
             print("======\n")
             print('contrôle {} dept {}'.format(kind, dep))
-            exec('controle.{}.check_{}({})'.format(resource, kind, dep))
+            exec('controle.{}.check_{}("{}")'.format(resource, kind, dep))
 
-
+ 
 #controle.controle.check_pile()
 #controle.controle.check_group_kind()
 
