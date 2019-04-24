@@ -21,7 +21,8 @@ def check_position_outside_municipality(dep):
         "and m.insee=sc.code_insee "
         "and sc.gcms_detruit=FALSE "
         "and ST_Within(st_transform(st_setsrid(p.center,4326),{}), st_setsrid(sc.geometrie_ge,{}))=FALSE "
-        "and m.insee like '{}%'".format(proj, proj, dep)
+        "and m.insee like '{}%' " 
+	"and p.deleted_at is null".format(proj, proj, dep)
     )
     resources = cur.fetchall()
 
@@ -46,7 +47,8 @@ def check_position_pile(dep):
         "where p.housenumber_id=h.pk "
         "and h.parent_id=g.pk "
         "and g.municipality_id=m.pk "
-        "and m.insee like '{}%'".format(proj, dep)
+        "and m.insee like '{}%' "
+	"and p.deleted_at is null".format(proj, dep)
     )
     cur.execute("CREATE INDEX idx_position_temp_proj ON position_temp USING gist (proj)")
     print("Regroupement par paire ({}) \n".format(str(datetime.datetime.now())))
@@ -60,7 +62,7 @@ def check_position_pile(dep):
         "WHERE p1.housenumber_id=h1.pk AND p2.housenumber_id=h2.pk AND "
         "NOT h1.pk=h2.pk AND "
         "p1.source_kind=p2.source_kind AND " 
-        "p1.proj && st_buffer(p2.proj,5) AND st_distance(p1.proj, p2.proj)<5"
+        "p1.proj && st_buffer(p2.proj,3) AND st_distance(p1.proj, p2.proj)<3"
     )
     resources = cur.fetchall()
     controle.controle.insert_item_from_pair("position_pile", resources, dep)
