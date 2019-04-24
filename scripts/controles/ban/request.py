@@ -74,10 +74,19 @@ def post_anomaly(anomaly):
     session = ban.api_session.ApiSession()
     url = session.config['BASE_URL'] + '/anomaly'
     headers = session.get_headers(has_body=True)
-    request = requests.post(url, json=anomaly, proxies=session.get_proxies(), headers=headers)
-    if request.status_code != 201:
-        raise Exception('Failed to create anomaly. {}'.format(request.content))
-    return request.json()
+    attempt=0
+    try:	
+        request = requests.post(url, json=anomaly, proxies=session.get_proxies(), headers=headers)
+        if request.status_code != 201:
+            raise Exception('Failed to create anomaly. {}'.format(request.content))
+        return request.json()
+    except:
+        attempt += 1
+        if attempt > 3:
+            raise Exception('Failed to post request {} '.format(request.content))	
+        print("Error during request post, I will try again")
+        sleep(5)
+    raise Exception('Failed to create anomaly')
 
 
 def delete_anomaly(anomaly_id):
