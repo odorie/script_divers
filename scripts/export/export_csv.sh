@@ -80,8 +80,8 @@ left join
 	p.kind
 	from position as p
 	left join housenumber as h on p.housenumber_id=h.pk
-	left join postcode as pt on h.postcode_id=pt.pk
-	left join municipality as mun on pt.municipality_id = mun.pk
+	left join \"group\" as g on h.parent_id=g.pk
+	left join municipality as mun on g.municipality_id = mun.pk
 	where mun.insee like '${municipality}%'
 	and p.deleted_at is null 
 	order by p.housenumber_id, p.modified_at DESC
@@ -115,15 +115,16 @@ left join
 	and mun2.insee like '${municipality}%'
 	order by hng.housenumber_id, anc.modified_at DESC
 ) as anc_area on hn.pk = anc_area.housenumber_id
-left join postcode as pt on hn.postcode_id = pt.pk  
-left join municipality as m on pt.municipality_id = m.pk
+left join postcode as pt on hn.postcode_id = pt.pk
+left join \"group\" as g2 on g2.pk=hn.parent_id
+left join municipality as m on g2.municipality_id = m.pk
 where m.insee like '${municipality}%'
 and hn.deleted_at is null
 and hn.number is not null"
 
 requete=`echo ${requete}| sed "s/\n//"`
 
-echo "\COPY (${requete}) TO '${outPath}/${municipality}_ban_v0.csv' CSV HEADER" >> ${outPath}/commandeTemp.sql
+echo "\COPY (${requete}) TO '${outPath}/export_${municipality}.csv' CSV HEADER" >> ${outPath}/commandeTemp.sql
 
 psql -f ${outPath}/commandeTemp.sql
 
