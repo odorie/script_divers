@@ -15,6 +15,7 @@ print("Debut de la synchronisation avec la ban ({}) \n".format(str(datetime.date
 parser = argparse.ArgumentParser()
 parser.add_argument("--kind", help="Kind à traiter (un seul kind)",type=str)
 parser.add_argument("--dept", help="Numéro du département à traiter (un seul département)",type=str)
+parser.add_argument("--dump", help="Fichier dump d'extraction",type=str)
 args = parser.parse_args()
 
 # vérification du paramètre kind
@@ -43,27 +44,36 @@ cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
 # Récupération de toutes les anomalies BAN de ce kind et sur ce département
 # Et chargement dans la table controles.ban_anomaly de la base de travail
-cur.execute("TRUNCATE controles.ban_anomaly")
-
+# 2 modes : soit chargement par l'API (lent), soit par un dump existant
 print("Recuperation des anomalies ban de kind {} sur le dép {} \n".format(kind, dept))
-total_ano = ban.request.get_anomaly_count(dept, kind)
+cur.execute("TRUNCATE controles.ban_anomaly")
+if args.dump is None:
+    total_ano = ban.request.get_anomaly_count(dept, kind)
 
-bar = progressbar.ProgressBar(max_value=total_ano).start()
-count = 0
+    bar = progressbar.ProgressBar(max_value=total_ano).start()
+    count = 0
 
-for i in range(0, total_ano, 100):
-    collection_ano = ban.request.get_anomaly_by_bloc(dept,kind,100,i)
-    # on liste chaque anomalie
-    for ano_ban in collection_ano:
-        count = count + 1
-        resources = ano_ban['versions']
-        for resource in resources:
-            cur.execute("INSERT INTO controles.ban_anomaly(id_anomaly,kind,id_res,version) VALUES (%s, %s, %s, %s)",
-                        (ano_ban['id'], kind, resource['data']['id'], resource['data']['version']))
-        if count % 17 == 0:
-            bar.update(count)
-conn.commit()
-bar.finish()
+    for i in range(0, total_ano, 100):
+        collection_ano = ban.request.get_anomaly_by_bloc(dept,kind,100,i)
+        # on liste chaque anomalie
+        for ano_ban in collection_ano:
+            count = count + 1
+            resources = ano_ban['versions']
+            for resource in resources:
+                cur.execute("INSERT INTO controles.ban_anomaly(id_anomaly,kind,id_res,version) VALUES (%s, %s, %s, %s)",
+                            (ano_ban['id'], kind, resource['data']['id'], resource['data']['version']))
+            if count % 17 == 0:
+                bar.update(count)
+    conn.commit()
+    bar.finish()
+else:
+    if os.path.exists(args.dump) is False:
+        raise Exception("Le fichier {} n'existe pas".format(args.dump))
+    f = open(args.dump, 'r', encoding="utf-8")
+    cur.copy_expert("COPY controles.ban_anomaly(id_anomaly,kind,version,id_res) FROM STDIN CSV HEADER DELIMITER ';'", f)
+    f.close()
+    conn.commit()
+
 
 # Comparaison des anomalies calculées et des anomalies BAN : on le fait en PostgreSQL :
 # on fait 2 tables anomalies new et anomalies old
@@ -127,6 +137,7 @@ bar = progressbar.ProgressBar(max_value=row['count']).start()
 count = 0
 
 cur.execute("select * from controles.anomaly_new")
+nb_error = 0
 type_resource = kind.split("_")[0]
 for row in cur:
     count = count + 1
@@ -143,7 +154,10 @@ for row in cur:
         json_resource["resource"] = type_resource
         versions.append(json_resource)
     anomaly["versions"] = versions
-    ban.request.post_anomaly(anomaly)
+    try:
+        ban.request.post_anomaly(anomaly)
+    except Exception as e:
+        nb_error = nb_error + 1
     if count % 17 == 0:
         bar.update(count)
 bar.finish()
@@ -165,11 +179,11 @@ cur.execute("select * from controles.anomaly_old")
 type_resource = kind.split("_")[0]
 for row in cur:
     count = count + 1
-    print("suppression {}".format(row['id_anomaly']))
     ban.request.delete_anomaly(row['id_anomaly'])
     if count % 17 == 0:
         bar.update(count)
 bar.finish()
 
 print("Fin de la synchronisation ({}) \n".format(str(datetime.datetime.now())))
+print("Nombre d'erreurs: {}".format(nb_error))
 

@@ -47,6 +47,7 @@ def check_position_pile(dep):
         "where p.housenumber_id=h.pk "
         "and h.parent_id=g.pk "
         "and g.municipality_id=m.pk "
+        "and source_kind = 'ign' "
         "and m.insee like '{}%' "
 	"and p.deleted_at is null".format(proj, dep)
     )
