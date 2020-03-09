@@ -9,11 +9,11 @@
 #     PGDATABASE et si besoin PGUSER, PGHOST et PGPASSWORD
 #############################################################################
 exportPath=$1
-pythonPath=$2
 currentDir=$(dirname "$0")
-if [ $# -lt 1 ]; then
-        echo "Usage : export_csv_fr.sh <outPath>"
-        echo "Exemple : export_csv_fr.sh /home/ban/test"
+date=$2
+if [ $# -lt 2 ]; then
+        echo "Usage : export_csv_fr.sh <outPath> <date>"
+        echo "Exemple : export_csv_fr.sh /home/ban/test 20190701"
         exit 1
 fi
 set -x
@@ -21,9 +21,13 @@ deps="01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 2A 2B 21 22 23 24
 for dep in ${deps}
 do
 	echo $dep
-	if [ ! -f $exportPath"/export_"$dep".csv" ]; then
-		$currentDir"/export_csv.sh" $exportPath $dep 
+	$currentDir"/export_csv.sh" $exportPath $dep $date
+	if [ $? -ne 0 ]
+	then
+   		echo "Erreur lors de l export du csv"
+   		exit 1
 	fi
+
 done
 
 echo "FIN"
