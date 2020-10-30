@@ -10,3 +10,4 @@ Ce répertoire contient des programmes d'export de la ban au format suivant :
 * csv : export par département 
 
 
+Il contient aussi des scripts de contrôle de la BAN
